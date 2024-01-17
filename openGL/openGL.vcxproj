@@ -140,7 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="glad.c" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="ScanLineZBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ZBufferStruct.h" />
