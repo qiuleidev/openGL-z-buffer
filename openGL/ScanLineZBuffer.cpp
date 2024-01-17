@@ -397,12 +397,10 @@ int main()
 	}
 	//获取分类多边形表
 	buildClassifyPolygonEdgeTable();
-	for (int i = 0; i < classifyPolygonTable.size(); i++) {
-		ClassifyPolygonNode* head = classifyPolygonTable[i];
-		while (head!=nullptr)
-		{
-			head = head->next;
-		}
+
+	//扫描线扫描
+	for (int i = 0; i < height; i++) {
+
 	}
     return 0;
 }
