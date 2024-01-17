@@ -118,9 +118,9 @@ void buildClassifyPolygonEdgeTable() {
 		cpn->color = polygon.color;
 		cpn->next = NULL;
 		//将分类多边形结点插入到分类多边形表的对应位置
-		ClassifyPolygonNode* cpnHead = classifyPolygonTable[yMin];
+		ClassifyPolygonNode* cpnHead = classifyPolygonTable[yMax];
 		if (cpnHead == NULL) {
-			classifyPolygonTable[yMin] = cpn;
+			classifyPolygonTable[yMax] = cpn;
 		}
 		else {
 			while (cpnHead->next != NULL) {
@@ -157,9 +157,9 @@ void buildClassifyPolygonEdgeTable() {
 			cen->id = i;
 			cen->next = NULL;
 			//将分类边结点插入到分类边表的对应位置
-			ClassifyEdgeNode* cenHead = classifyEdgeTable[std::min(y1, y2)];
+			ClassifyEdgeNode* cenHead = classifyEdgeTable[std::max(y1, y2)];
 			if (cenHead == NULL) {
-				classifyEdgeTable[std::min(y1, y2)] = cen;
+				classifyEdgeTable[std::max(y1, y2)] = cen;
 			}
 			else {
 				while (cenHead->next != NULL) {
@@ -354,5 +354,55 @@ void updateActiveNodes(GLint y) {
 }
 int main()
 {
+	//获取模型文件
+	Assimp::Importer importer;
+
+	const aiScene* scene = importer.ReadFile("E:\\UE5Projects\\test\\openGL\\assets\\bunny.obj",
+		aiProcess_CalcTangentSpace |
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_SortByPType);
+	
+	int meshes = scene->mNumMeshes;
+
+	float maxX, minX;
+	// 初始化为第一个顶点的坐标
+	maxX = minX = scene->mMeshes[0]->mVertices[0].x;
+	//获取多边形列表
+	for (int i = 0; i < meshes; i++) {
+		aiMesh* mesh = scene->mMeshes[i];
+		for (int k = 0; k < mesh->mNumFaces; k++) {
+			zPolygon polygon;
+			aiFace face = mesh->mFaces[k];
+			for (int j = 0; j < face.mNumIndices; j++) {
+				zVertex vertex;
+				vertex.x = mesh->mVertices[face.mIndices[j]].x;
+				vertex.y = mesh->mVertices[face.mIndices[j]].y;
+				vertex.z = mesh->mVertices[face.mIndices[j]].z;
+				if (vertex.x > maxX)maxX = vertex.x;
+				if (vertex.x < minX)minX = vertex.x;
+				polygon.vertices.push_back(vertex);
+			}
+			polygons.push_back(polygon);
+		}
+	}
+	//适应屏幕
+	float scale = height / 2 / (maxX - minX);
+	for (int i = 0; i < polygons.size(); i++) {
+		for (int j = 0; j < polygons[i].vertices.size(); j++) {
+			polygons[i].vertices[j].x *= scale;
+			polygons[i].vertices[j].y *= scale;
+			polygons[i].vertices[j].z *= scale;
+		}
+	}
+	//获取分类多边形表
+	buildClassifyPolygonEdgeTable();
+	for (int i = 0; i < classifyPolygonTable.size(); i++) {
+		ClassifyPolygonNode* head = classifyPolygonTable[i];
+		while (head!=nullptr)
+		{
+			head = head->next;
+		}
+	}
     return 0;
 }
