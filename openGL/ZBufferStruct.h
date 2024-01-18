@@ -15,7 +15,7 @@ using namespace std;
 #define MAX_BONE_INFLUENCE 4
 //定义颜色结构体
 struct Color {
-    GLubyte R = rand() % 256, G = rand() % 256, B = rand() % 256;//R、G、B颜色
+    GLubyte R, G, B;//R、G、B颜色
 };
 
 //定义顶点结构体

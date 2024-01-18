@@ -115,6 +115,9 @@ void buildClassifyPolygonEdgeTable() {
 		cpn->d = d;
 		cpn->id = i;
 		cpn->dy = calculateDY(polygon);
+		polygon.color.R = rand() % 256;
+		polygon.color.G = rand() % 256;
+		polygon.color.B = rand() % 256;
 		cpn->color = polygon.color;
 		cpn->next = NULL;
 		//将分类多边形结点插入到分类多边形表的对应位置
@@ -247,8 +250,7 @@ void sortActiveEdgeNodes() {
 }
 
 //计算活化边表中的交点对的深度值和深度增量的函数
-void calculateDepthAndIncrement() {
-	GLint y = round(activeEdgeHead->xl);
+void calculateDepthAndIncrement(GLint y) {
 	//遍历活化边表中的所有结点
 	ActiveEdgeNode* aen = activeEdgeHead;
 	while (aen != NULL) {
@@ -290,7 +292,9 @@ void updateFrameBufferAndZBuffer(GLint y) {
 				while (apn != NULL) {
 					if (apn->id == aen->id) {
 						//更新帧缓冲器中的颜色
-						frameBuffer[x][y] = apn->color;
+						frameBuffer[x][y].R = apn->color.R;
+						frameBuffer[x][y].G = apn->color.G;
+						frameBuffer[x][y].B = apn->color.B;
 						break;
 					}
 					apn = apn->next;
@@ -398,9 +402,22 @@ int main()
 	//获取分类多边形表
 	buildClassifyPolygonEdgeTable();
 
-	//扫描线扫描
+	//开始扫描
 	for (int i = 0; i < height; i++) {
-
+		//初始化z缓冲器
+		for (GLfloat j : zBuffer) {
+			j = minZ;
+		}
+		//将分类多边形表和分类边表中的结点移动到活化多边形表和活化边表中
+		moveClassifyNodesToActiveNodes(i);
+		//对活化边表中的结点进行排序
+		sortActiveEdgeNodes();
+		//计算活化边表中的交点对的深度值和深度增量
+		calculateDepthAndIncrement(i);
+		//遍历活化边表中的交点对，更新帧缓冲器和z缓冲器
+		updateFrameBufferAndZBuffer(i);
+		//更新活化多边形表和活化边表中的结点
+		updateActiveNodes(i);
 	}
     return 0;
 }
